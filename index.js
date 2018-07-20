@@ -6,8 +6,30 @@ var http = require('http');
 var https = require('https');
 var url = require('url');
 var StringDecoder = require('string_decoder').StringDecoder;
-var config = require('./config');
+var config = require('./lib/config');
 var fs = require('fs');
+var handlers = require('./lib/handlers');
+var helpers = require('./lib/helpers');
+var _data = require('./lib/data');
+
+/*
+//TESTING
+//@todo delete this
+_data.create('test','newnewFile',{'foo':'bar'},function(err){
+	console.log('this was the error:', err);
+});
+
+//@todo delete this
+_data.read('test', 'newFile', function(err, data){
+	console.log('this was the error:', err);	
+	console.log('and this was the data', data);
+});
+
+//@todo delete this
+_data.delete('test', 'newFile', function(err){
+	console.log('this was the error in delte function:', err);	
+});
+*/
 
 //instantiate the http server
 var httpServer = http.createServer(function(req, res){
@@ -71,7 +93,7 @@ var unifiedServer = function(req, res){
 			'queryStringObject' : queryStringObject,
 			'method' : method,
 			'headers' : headers,
-			'payload' : buffer
+			'payload' : helpers.parseJsonToObject(buffer)
 		}
 
 		//route the data to the handler specified in the router
@@ -100,29 +122,12 @@ var unifiedServer = function(req, res){
 	});
 };
 
-
-//define the handlers
-var handlers = {};
-
-//ping handler
-handlers.ping = function(data, callback){
-    callback(200);
-}
-
-//hello handler
-handlers.hello = function(data, callback){
-	callback(200, {'greeting' : 'this is a greeting'})
-}
-
-//not found handler
-handlers.notFound = function(data, callback){
-	callback(404);
-};
-
-//define the req router
+//define the request router
 var router = {
     'ping' : handlers.ping,
-    'hello' : handlers.hello
+    'hello' : handlers.hello,
+    'users' : handlers.users,
+    'tokens' : handlers.tokens
 };
 
 
